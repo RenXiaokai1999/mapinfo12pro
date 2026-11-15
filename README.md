@@ -12,16 +12,40 @@ MapInfo Professional 12.0.2 Build 208 的原生修改项目。目标是在 MapIn
 - 为已定位的路径拼接增加了缓冲区边界检查。在 323 字符中文路径的测试中，打开操作返回错误，已有图层仍可访问。打开这类长路径和保存时的截断处理还有待完成。
 - 跨表合并历史、布局和图层样式撤回仍待实现。
 
-## 在本机生成程序
+## Windows 部署
 
-在 Windows 上准备 Python 3 和已授权的 32 位 MapInfo Professional 12.0.2 Build 208。解压发布 ZIP，在解压目录中运行以下命令。第二个路径应指向一个尚未创建的目录。
+### 1. 安装并核对 MapInfo 原版
+
+从 [Precisely 的 MapInfo Pro 下载入口](https://support.precisely.com/product-downloads/for/mapinfo-professional/) 或你的组织提供的授权介质获取 **32 位 MapInfo Professional 12.0.2 Build 208**。如果介质是 12.0 基础版，请安装对应的 12.0.2 维护更新。先按原版流程激活并启动一次，确认原版能够正常打开。
+
+本项目按核心文件的 SHA-256 匹配构建。以下命令中的路径请改成你的实际安装目录。
 
 ```powershell
-python -m pip install -r requirements.txt
-python build_app.py 'C:\Program Files (x86)\MapInfo\Professional' 'D:\mapinfo12pro'
+$mapinfo = 'C:\Program Files (x86)\MapInfo\Professional'
+Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $mapinfo 'micore.dll')
 ```
 
-生成成功后，双击 `D:\mapinfo12pro\mapinfo12pro.exe`，保留同目录的运行文件。构建器保留原安装目录，遇到不支持的核心 DLL 或已存在的输出目录时会报错。下载包提供构建源码和说明，MapInfo 运行文件和授权来自你自己的本机安装。
+支持的 SHA-256 为 `5c0633da51941635bf897c7409ff976afdb685e9a5c92658795ee073a4dbde64`。仅显示相同版本号的核心文件也可能有不同的哈希。
+
+### 2. 下载并生成增强版
+
+安装 Python 3。下载并解压 [mapinfo12pro v0.1.0](https://github.com/RenXiaokai1999/mapinfo12pro/releases/download/v0.1.0/mapinfo12pro-v0.1.0.zip)，在含有 `build_app.py` 的解压目录中打开 PowerShell。输出路径应位于原安装目录之外，且尚未创建。
+
+```powershell
+$mapinfo = 'C:\Program Files (x86)\MapInfo\Professional'
+$output = 'D:\mapinfo12pro'
+python -m pip install -r requirements.txt
+if ($LASTEXITCODE -ne 0) { throw '构建依赖安装失败' }
+python build_app.py $mapinfo $output
+```
+
+构建器读取原版安装目录，在输出目录生成独立的增强版副本。
+
+### 3. 启动并验证撤回
+
+双击 `D:\mapinfo12pro\mapinfo12pro.exe`，保留同目录的运行文件。打开一份本地 Native TAB 样本，连续执行两次编辑，再按两次 **Ctrl+Z**，逐步检查结果。MapInfo 运行文件及授权来自本机原版安装。
+
+遇到 `Unsupported micore.dll` 时，核对第 1 步的版本和哈希。遇到 `Destination already exists` 时，换一个尚不存在的输出目录。若启动时仍显示原版激活窗口，请核对本机 MapInfo 授权。
 
 ## 验证范围
 
