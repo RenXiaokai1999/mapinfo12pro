@@ -1,0 +1,14 @@
+__pycache__/
+.venv/
+*.dll
+*.exe
+*.rar
+*.zip
+*.msi
+*.msp
+*.tab
+*.dat
+*.map
+*.id
+*.ind
+*.wor
